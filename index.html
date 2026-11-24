@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laravel Application Security Practices Developers Should Follow</title>
+<meta name="description" content="An interactive pre launch security check for Laravel developers: secrets, policies, validation, API tokens, logging and hosting, with guides and training links.">
+<meta name="theme-color" content="#FF2D20">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--red:#FF2D20;--red-d:#C81E14;--blush:#FFF1EF;--mist:#F6DEDB;--ink:#241F2E;--soft:#5E5869;--white:#fff;--r:22px}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{font-family:Figtree,system-ui,sans-serif;color:var(--ink);background:var(--white);line-height:1.6;font-size:17px}
+h1,h2,h3{font-family:"Bricolage Grotesque",Figtree,sans-serif;line-height:1.08;letter-spacing:-.02em}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:8px}
+.wrap{width:min(1120px,92%);margin-inline:auto}
+
+/* header */
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:2px solid var(--ink)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:"Bricolage Grotesque";font-weight:800;font-size:1.15rem}
+.brand svg{width:30px;height:34px}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+nav a{text-decoration:none;font-weight:600;font-size:.95rem;padding:8px 14px;border-radius:99px}
+nav a:hover{background:var(--blush)}
+nav a.cta{background:var(--red);color:#fff}
+nav a.cta:hover{background:var(--red-d)}
+
+/* hero */
+.hero{background:var(--blush);border-bottom:2px solid var(--ink);overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:72px 0 80px}
+.hero h1{font-size:clamp(2.6rem,6vw,4.8rem);font-weight:800}
+.hero h1 span{display:block;color:var(--red)}
+.hero p{margin:22px 0 30px;max-width:52ch;color:var(--soft);font-size:1.12rem}
+.btns{display:flex;gap:14px;flex-wrap:wrap}
+.btn{display:inline-block;text-decoration:none;font-weight:600;padding:14px 24px;border-radius:14px;border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink);transition:transform .15s,box-shadow .15s;background:#fff}
+.btn:hover{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink)}
+.btn.red{background:var(--red);color:#fff}
+.gauge{position:relative;display:grid;place-items:center}
+.gauge svg{width:min(330px,80%);height:auto;filter:drop-shadow(8px 8px 0 var(--ink))}
+.pct{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.pct b{font-family:"Bricolage Grotesque";font-size:3.6rem;line-height:1;color:var(--ink)}
+.pct small{font-weight:600;color:var(--ink)}
+.stamp{position:absolute;right:2%;bottom:6%;transform:rotate(-9deg) scale(.6);opacity:0;border:3px solid var(--ink);background:#fff;padding:8px 16px;border-radius:12px;font-family:"Bricolage Grotesque";font-weight:800;transition:all .35s cubic-bezier(.3,1.6,.5,1)}
+.stamp.on{opacity:1;transform:rotate(-9deg) scale(1)}
+
+/* checklist */
+section{padding:84px 0}
+.head{max-width:680px;margin-bottom:36px}
+.head h2{font-size:clamp(2rem,4vw,3.1rem)}
+.head p{color:var(--soft);margin-top:12px}
+.checks{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.check{display:flex;gap:16px;text-align:left;width:100%;font:inherit;color:inherit;background:#fff;border:2px solid var(--ink);border-radius:var(--r);padding:20px;cursor:pointer;transition:background .2s,transform .2s}
+.check:hover{transform:translateY(-3px)}
+.box{flex:none;width:30px;height:30px;border:2px solid var(--ink);border-radius:9px;display:grid;place-items:center;background:#fff}
+.box svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .25s}
+.check h3{font-size:1.15rem;margin-bottom:4px}
+.check p{font-size:.95rem;color:var(--soft);max-height:0;overflow:hidden;opacity:0;transition:max-height .35s,opacity .3s}
+.check[aria-pressed=true]{background:var(--red);color:#fff}
+.check[aria-pressed=true] .box{background:var(--ink);border-color:var(--ink)}
+.check[aria-pressed=true] .box svg{stroke-dashoffset:0}
+.check[aria-pressed=true] p{max-height:140px;opacity:1;color:#fff;margin-top:4px}
+.reset{margin-top:22px;font:inherit;font-weight:600;background:none;border:0;text-decoration:underline;cursor:pointer}
+
+/* reads and learn */
+.alt{background:var(--ink);color:#fff}
+.alt .head p{color:#cfc9da}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.card{display:flex;flex-direction:column;text-decoration:none;background:#fff;color:var(--ink);border-radius:var(--r);padding:26px;border:2px solid var(--ink);box-shadow:6px 6px 0 var(--red);transition:transform .18s,box-shadow .18s}
+.card:hover{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--red)}
+.card .tag{align-self:flex-start;font-size:.8rem;font-weight:600;background:var(--blush);color:var(--red-d);padding:4px 12px;border-radius:99px;margin-bottom:14px}
+.card h3{font-size:1.3rem;margin-bottom:8px}
+.card p{color:var(--soft);font-size:.95rem;flex:1}
+.card em{margin-top:16px;font-style:normal;font-weight:600;color:var(--red-d)}
+.learn .card{box-shadow:6px 6px 0 var(--ink)}
+.learn .card:hover{box-shadow:2px 2px 0 var(--ink)}
+
+/* tip strip */
+.strip{background:var(--red);color:#fff;border-block:2px solid var(--ink);padding:34px 0;text-align:center}
+.strip code{font-size:clamp(1.1rem,3vw,1.6rem);font-weight:600;background:var(--ink);padding:6px 16px;border-radius:10px;display:inline-block;margin:4px}
+
+/* footer */
+footer{background:var(--ink);color:#d9d3e3;padding:56px 0 30px}
+.fgrid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:34px}
+footer h4{color:#fff;font-family:"Bricolage Grotesque";margin-bottom:12px}
+footer ul{list-style:none;padding:0}
+footer li{margin:8px 0}
+footer a{text-decoration:none}
+footer a:hover{color:#fff;text-decoration:underline}
+.legal{border-top:1px solid #4a4357;margin-top:36px;padding-top:20px;font-size:.9rem}
+
+@media(max-width:820px){
+ .hero .wrap{grid-template-columns:1fr;padding:48px 0 56px}
+ .checks,.fgrid{grid-template-columns:1fr}
+ nav a:not(.cta){display:none}
+ section{padding:60px 0}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="wrap bar">
+  <a class="brand" href="#top" aria-label="Secure Laravel home">
+   <svg viewBox="0 0 200 240" aria-hidden="true"><path d="M100 8 184 40v76c0 54-38 94-84 116C54 210 16 170 16 116V40z" fill="#FF2D20" stroke="#241F2E" stroke-width="12"/></svg>
+   Secure Laravel
+  </a>
+  <nav aria-label="Main">
+   <a href="#check">Pre launch check</a>
+   <a href="#read">Guides</a>
+   <a href="#learn">Training</a>
+   <a class="cta" href="https://www.justacademy.co/blog-detail/laravel-application-security-practices-developers-should-follow" target="_blank" rel="noopener">Read the guide</a>
+  </nav>
+ </div>
+</header>
+
+<main id="top">
+ <div class="hero">
+  <div class="wrap">
+   <div>
+    <h1>Your Laravel app works. <span>Would it survive a bad day?</span></h1>
+    <p>Most breaches come from small things: a debug flag, an unchecked route, a secret in the wrong place. Tick through the checks below and watch your shield fill up before you deploy.</p>
+    <div class="btns">
+     <a class="btn red" href="#check">Start the check</a>
+     <a class="btn" href="https://www.justacademy.co/blog-detail/laravel-application-security-practices-developers-should-follow" target="_blank" rel="noopener">Read the full guide</a>
+    </div>
+   </div>
+   <div class="gauge" aria-live="polite">
+    <svg viewBox="0 0 200 240" role="img" aria-label="Security shield that fills as you complete checks">
+     <defs><clipPath id="clip"><path d="M100 8 184 40v76c0 54-38 94-84 116C54 210 16 170 16 116V40z"/></clipPath></defs>
+     <path d="M100 8 184 40v76c0 54-38 94-84 116C54 210 16 170 16 116V40z" fill="#fff"/>
+     <rect id="fill" x="0" y="240" width="200" height="240" fill="#FF2D20" clip-path="url(#clip)" style="transition:y .6s cubic-bezier(.3,1.2,.5,1)"/>
+     <path d="M100 8 184 40v76c0 54-38 94-84 116C54 210 16 170 16 116V40z" fill="none" stroke="#241F2E" stroke-width="8"/>
+    </svg>
+    <div class="pct"><b id="pct">0%</b><small id="msg">Not ready to ship</small></div>
+    <div class="stamp" id="stamp">Safe to ship</div>
+   </div>
+  </div>
+ </div>
+
+ <section id="check">
+  <div class="wrap">
+   <div class="head">
+    <h2>The eight checks before every deploy</h2>
+    <p>Tap a check to mark it done. Each one opens a short note on why it matters.</p>
+   </div>
+   <div class="checks" id="list"></div>
+   <button class="reset" id="reset" type="button">Clear all checks</button>
+  </div>
+ </section>
+
+ <div class="strip">
+  <div class="wrap"><code>APP_DEBUG=false</code> <code>composer audit</code> <code>$this-&gt;authorize()</code></div>
+ </div>
+
+ <section id="read" class="alt">
+  <div class="wrap">
+   <div class="head">
+    <h2>Keep reading</h2>
+    <p>Four guides that go deeper on security, projects and where a Laravel career can go.</p>
+   </div>
+   <div class="cards">
+    <a class="card" href="https://www.justacademy.co/blog-detail/laravel-application-security-practices-developers-should-follow" target="_blank" rel="noopener"><span class="tag">Security</span><h3>Laravel Application Security Practices</h3><p>Secrets, policies, validation, APIs, hosting and logs, explained in plain language.</p><em>Read guide</em></a>
+    <a class="card" href="https://www.justacademy.co/blog-detail/laravel-projects-ideas-for-building-backend-development-skills" target="_blank" rel="noopener"><span class="tag">Projects</span><h3>Laravel Project Ideas</h3><p>Backend builds worth practising, and each one is a good place to apply the checks above.</p><em>Read guide</em></a>
+    <a class="card" href="https://www.justacademy.co/blog-detail/laravel-developer-career-path-skills-salary-future-scope" target="_blank" rel="noopener"><span class="tag">Career</span><h3>Laravel Developer Career Path</h3><p>Skills, salary range and future scope for people working with PHP and Laravel.</p><em>Read guide</em></a>
+    <a class="card" href="https://www.justacademy.co/blog-detail/laravel-developer-roadmap-2026-skills-projects-and-career-opportunities" target="_blank" rel="noopener"><span class="tag">Roadmap</span><h3>Laravel Developer Roadmap 2026</h3><p>A step by step order for skills, projects and opportunities this year.</p><em>Read guide</em></a>
+   </div>
+  </div>
+ </section>
+
+ <section id="learn" class="learn">
+  <div class="wrap">
+   <div class="head">
+    <h2>Learn it with a mentor beside you</h2>
+    <p>Live interactive, instructor led and mentor led programmes for learners in Hyderabad, covering the framework and the tools around it.</p>
+   </div>
+   <div class="cards">
+    <a class="card" href="https://www.justacademy.co/course-detail/hyderabad/laravel-training-in-hyderabad" target="_blank" rel="noopener"><span class="tag">Course</span><h3>Laravel Training in Hyderabad</h3><p>Routes, Eloquent, authentication and safe application design from the ground up.</p><em>View course</em></a>
+    <a class="card" href="https://www.justacademy.co/course-detail/hyderabad/selenium-training-in-hyderabad" target="_blank" rel="noopener"><span class="tag">Course</span><h3>Selenium Training in Hyderabad</h3><p>Automate browser tests so protected pages and forms stay protected after every change.</p><em>View course</em></a>
+    <a class="card" href="https://www.justacademy.co/course-detail/hyderabad/python-training-in-hyderabad" target="_blank" rel="noopener"><span class="tag">Course</span><h3>Python Training in Hyderabad</h3><p>Scripting skills for log analysis, reports and the small helpers every team needs.</p><em>View course</em></a>
+    <a class="card" href="https://www.justacademy.co/job-bootcamp-detail/hyderabad/full-stack-developer-pro-bootcamp-in-hyderabad-online-job-oriented-web-development-training" target="_blank" rel="noopener"><span class="tag">Bootcamp</span><h3>Full Stack Developer Pro Bootcamp</h3><p>Job oriented web development across backend and frontend, taught online and live.</p><em>View bootcamp</em></a>
+   </div>
+  </div>
+ </section>
+</main>
+
+<footer>
+ <div class="wrap">
+  <div class="fgrid">
+   <div>
+    <h4>Secure Laravel</h4>
+    <p>A small, free reference for developers who want the Laravel framework to stay safe long after launch day.</p>
+   </div>
+   <div>
+    <h4>Guides</h4>
+    <ul>
+     <li><a href="https://www.justacademy.co/blog-detail/laravel-application-security-practices-developers-should-follow" target="_blank" rel="noopener">Security practices</a></li>
+     <li><a href="https://www.justacademy.co/blog-detail/laravel-projects-ideas-for-building-backend-development-skills" target="_blank" rel="noopener">Project ideas</a></li>
+     <li><a href="https://www.justacademy.co/blog-detail/laravel-developer-career-path-skills-salary-future-scope" target="_blank" rel="noopener">Career path</a></li>
+     <li><a href="https://www.justacademy.co/blog-detail/laravel-developer-roadmap-2026-skills-projects-and-career-opportunities" target="_blank" rel="noopener">Roadmap 2026</a></li>
+    </ul>
+   </div>
+   <div>
+    <h4>Training</h4>
+    <ul>
+     <li><a href="https://www.justacademy.co/course-detail/hyderabad/laravel-training-in-hyderabad" target="_blank" rel="noopener">Laravel</a></li>
+     <li><a href="https://www.justacademy.co/course-detail/hyderabad/selenium-training-in-hyderabad" target="_blank" rel="noopener">Selenium</a></li>
+     <li><a href="https://www.justacademy.co/course-detail/hyderabad/python-training-in-hyderabad" target="_blank" rel="noopener">Python</a></li>
+     <li><a href="https://www.justacademy.co/job-bootcamp-detail/hyderabad/full-stack-developer-pro-bootcamp-in-hyderabad-online-job-oriented-web-development-training" target="_blank" rel="noopener">Full Stack Pro Bootcamp</a></li>
+    </ul>
+   </div>
+  </div>
+  <p class="legal">Laravel is a trademark of its respective owner. This page is an independent educational reference.</p>
+ </div>
+</footer>
+
+<script>
+const items=[
+ ["Debug mode is off in production","A live debug page can reveal file paths, environment values and stack traces to anyone who triggers an error."],
+ ["The .env file and app key stay private","They are never committed. A leaked application key can let attackers forge cookies and signed data."],
+ ["Every model sits behind a policy","Logging in is not permission. Policies stop one user from reading another user's invoice by changing a number."],
+ ["Input is validated and fillable is explicit","Form requests check type, length and allowed values, and mass assignment cannot promote a user to admin."],
+ ["Login and reset routes are rate limited","Throttling makes brute forcing impractical, and uniform responses stop attackers from learning which emails exist."],
+ ["API tokens have abilities and an expiry","A token that can do everything forever turns a lost phone into an incident."],
+ ["Dependencies are audited, version is supported","Run composer audit in CI and plan upgrades, because unsupported releases never receive fixes."],
+ ["Logs are masked and shipped off the server","Record who did what, never passwords or tokens, and keep a copy a compromised server cannot erase."]
+];
+const list=document.getElementById('list'),fill=document.getElementById('fill'),pct=document.getElementById('pct'),msg=document.getElementById('msg'),stamp=document.getElementById('stamp');
+let state=[];try{state=JSON.parse(localStorage.getItem('laravelChecks'))||[]}catch(e){}
+items.forEach((it,i)=>{
+ const b=document.createElement('button');b.type='button';b.className='check';
+ b.setAttribute('aria-pressed',state.includes(i));
+ b.innerHTML='<span class="box"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span><span><h3>'+it[0]+'</h3><p>'+it[1]+'</p></span>';
+ b.onclick=()=>{b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');update()};
+ list.appendChild(b);
+});
+function update(){
+ const on=[...list.children].map((c,i)=>c.getAttribute('aria-pressed')==='true'?i:null).filter(v=>v!==null);
+ const p=Math.round(on.length/items.length*100);
+ fill.setAttribute('y',240-240*p/100);
+ pct.textContent=p+'%';
+ msg.textContent=p===100?'Ready to deploy':p>=50?'Getting safer':p>0?'Keep going':'Not ready to ship';
+ stamp.classList.toggle('on',p===100);
+ try{localStorage.setItem('laravelChecks',JSON.stringify(on))}catch(e){}
+}
+document.getElementById('reset').onclick=()=>{[...list.children].forEach(c=>c.setAttribute('aria-pressed','false'));update()};
+update();
+</script>
+</body>
+</html>
